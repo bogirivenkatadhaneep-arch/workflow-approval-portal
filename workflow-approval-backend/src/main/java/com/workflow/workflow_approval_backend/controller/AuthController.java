@@ -1,5 +1,6 @@
 package com.workflow.workflow_approval_backend.controller;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,26 +14,30 @@ import com.workflow.workflow_approval_backend.repository.UserRepository;
 @CrossOrigin("*")
 public class AuthController {
 
-    @Autowired
-    private UserRepository repo;
+@Autowired
+private UserRepository repo;
 
-    @PostMapping("/login")
-    public User login(
-            @RequestBody User loginUser) {
+@PostMapping("/login")
+public Map<String, Object> login(
+        @RequestBody User loginUser) {
 
-        Optional<User> user =
-                repo.findByEmail(
-                        loginUser.getEmail());
+    Optional<User> user =
+            repo.findByEmail(
+                    loginUser.getEmail());
 
-        if(user.isPresent()) {
+    if (user.isPresent() &&
+        user.get().getPassword()
+                .equals(loginUser.getPassword())) {
 
-            if(user.get().getPassword()
-                    .equals(loginUser.getPassword())) {
-
-                return user.get();
-            }
-        }
-
-        throw new RuntimeException("Invalid Login");
+        return Map.of(
+                "message", "Login Success",
+                "email", user.get().getEmail(),
+                "role", user.get().getRole()
+        );
     }
+
+    throw new RuntimeException(
+            "Invalid Login");
+}
+
 }
